@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html style="text-align: center">
+    <meta name="viewport" content="width=device-width">
+<head>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <title>Canada Cities Population</title>
+</head>
+
+<body>
+    <h1>Canada Cities Population</h1>
+    <form id="form">
+        <select id="province">
+            <option value="0">Select Province</option>
+            {% for province in provinces %}
+            <option value="{{ province.id }}">{{ province.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <br>
+        <select id="city">
+            <option>Select City</option>
+        </select>
+        <br>
+        <p id="pop_label"></p>
+    </form>
+</body>
+
+</html>
