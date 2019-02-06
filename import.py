@@ -1,5 +1,5 @@
-# This module transforms records from a csv file into a sqlite database 
-# using pure (as opposed to flask_sqlalchemy which will be used at 
+# This module transforms records from a csv file into a sqlite database
+# using pure (as opposed to flask_sqlalchemy which will be used at
 # next step) SQLAlchemy orm to create the database
 
 import csv
@@ -15,6 +15,8 @@ engine = create_engine("sqlite:///ca.db")
 Base = declarative_base()
 
 # sqlalchemy class needs to inherit from declarative_base
+
+
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer, primary_key=True)
@@ -40,15 +42,21 @@ class Province(Base):
         return f"Province(name={self.name})"
 
 
-Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)  # create sqlalchemy schema
 Session = sessionmaker(bind=engine)
 session = Session()
 
-file_path = 'ca.csv'
+file_path = 'ca.csv'  # csv file is placed on the same directory
+
 if os.path.isfile(file_path):
     with open(file_path, 'r', encoding='utf8') as csv_file:
         reader = csv.DictReader(csv_file, delimiter=',')
-        prov_set = set([item.name for item in session.query(Province).all()])
+
+        # make a set of already existing rows in Province table
+        prov_set = set(
+            [item.name for item in session.query(Province).all()]
+        )
+        # if province does not exist already, add it to database
         for line in reader:
             if line['admin'] not in prov_set:
                 prov_set.add(line['admin'])
@@ -56,12 +64,13 @@ if os.path.isfile(file_path):
                 session.add(province)
         session.commit()
 
+    # create reader object again to populate database city table
     with open(file_path, 'r', encoding='utf8') as csv_file:
         reader = csv.DictReader(csv_file, delimiter=',')
         for line in reader:
             city = City(name=line['city'],
-                        population = line['population'],
-                        province_id = session.query(Province).\
+                        population=line['population'],
+                        province_id=session.query(Province).
                         filter_by(name=line['admin']).one().id)
             session.add(city)
         session.commit()
